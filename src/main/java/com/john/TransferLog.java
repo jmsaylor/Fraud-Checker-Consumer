@@ -1,17 +1,18 @@
 package com.john;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class TransferLog {
 
-    HashMap<String, String> log = new HashMap<>();
+    HashSet<String> set = new HashSet<>();
 
     public void add(String transaction) {
-        log.put(TransactionUtility.getAmount(transaction), transaction);
+        set.add(TransactionUtility.getAmount(transaction));
     }
 
     public boolean check(String transaction) {
-        return log.containsKey(TransactionUtility.getAmount(transaction));
+        return set.contains(TransactionUtility.getAmount(transaction));
     }
 
 }

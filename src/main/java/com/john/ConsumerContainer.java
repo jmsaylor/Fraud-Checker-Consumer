@@ -32,28 +32,27 @@ class ConsumerContainer {
     }
 
     public void run() {
-        consumer.subscribe(Collections.singleton("cash_out"));
-//        consumer.subscribe(Collections.singleton("transfer"));
+        consumer.subscribe(Collections.singleton("fraud_detection"));
 
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(400));
             for (ConsumerRecord<String, String> record : records) {
                 System.out.println(record.value());
-                switch (TransactionUtility.getTopic(record.value())) {
-                    case "transfer":
-                        log.add(record.value());
-                        System.out.println("t");
-                        break;
-                    case "cash_out":
-                        if (log.check(record.value())) {
-                            System.out.println("Potential Fraud");
+                if (record.value().length() < 25) continue;
+                if (TransactionUtility.isTransfer(record.value())) {
+                    System.out.println("transfer");
+                    log.add(record.value());
+                } else {
+                    System.out.println("cash_out");
+                    try {
+                        if (log.check(TransactionUtility.getAmount(record.value()))) {
+                            System.out.print("FRAUD ALERT " + record.value());
                         }
-                        System.out.println("c");
-                        System.out.println(record.value());
-                        break;
-                    default:
-                        break;
+                    } catch (Exception e) {
+                        System.out.println("ERROR");
+                    }
                 }
+
             }
         }
     }
